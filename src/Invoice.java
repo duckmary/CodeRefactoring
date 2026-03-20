@@ -1,45 +1,54 @@
 public class Invoice {
+
     private int invoiceNumber;
     private String customerName;
-    private double totalAmount;
-    private double taxAmount;
+    private double subtotal;
 
-    public Invoice(int invoiceNumber, String customerName, double totalAmount) {
+    private TaxCalculator taxCalculator;
+
+    public Invoice(int invoiceNumber, String customerName, double subtotal, TaxCalculator taxCalculator) {
         this.invoiceNumber = invoiceNumber;
         this.customerName = customerName;
-        this.totalAmount = totalAmount;
-        this.taxAmount = totalAmount * 0.15;
+        this.subtotal = subtotal;
+        this.taxCalculator = taxCalculator;
     }
 
-    public void printInvoiceDetails() {
-        System.out.println("Invoice Details:");
-        System.out.println("Invoice Number: " + invoiceNumber);
-        System.out.println("Customer Name: " + customerName);
-        System.out.println("Total Amount: " + totalAmount);
-        System.out.println("Tax Amount: " + taxAmount);
-        System.out.println("Amount with Tax: " + (totalAmount + taxAmount));
+    // --- Cálculos ---
+    public double getTax() {
+        return taxCalculator.calculateTax(subtotal);
     }
 
-    public double calculateTaxAmount() {
-        return totalAmount * 0.15;
+    public double getTotalWithTax() {
+        return subtotal + getTax();
     }
 
-    public double calculateTotalAmountWithTax() {
-        return totalAmount + taxAmount;
-    }
-
+    // --- Actualizaciones ---
     public void updateCustomerName(String newName) {
-        customerName = newName;
+        this.customerName = newName;
     }
 
     public void applyDiscount(double discountPercentage) {
-        totalAmount = totalAmount - (totalAmount * discountPercentage / 100);
-        taxAmount = totalAmount * 0.15;
+        double discountAmount = subtotal * (discountPercentage / 100);
+        subtotal -= discountAmount;
     }
 
-    public void printDiscountDetails() {
-        System.out.println("Discount Applied: " + totalAmount);
-        System.out.println("New Tax Amount: " + taxAmount);
-        System.out.println("Amount After Discount: " + (totalAmount + taxAmount));
+    // --- Presentación ---
+    public void printInvoiceDetails(Printer printer) {
+        printer.printHeader("Invoice Details");
+        printer.printLine("Invoice Number", invoiceNumber);
+        printer.printLine("Customer Name", customerName);
+        printer.printLine("Subtotal", subtotal);
+        printer.printLine("Tax", getTax());
+        printer.printLine("Total with Tax", getTotalWithTax());
+        printer.printSeparator();
+    }
+
+    public void printDiscountSummary(Printer printer, double discountPercentage) {
+        printer.printHeader("Discount Summary");
+        printer.printLine("Discount Applied (%)", discountPercentage);
+        printer.printLine("New Subtotal", subtotal);
+        printer.printLine("New Tax", getTax());
+        printer.printLine("Total After Discount", getTotalWithTax());
+        printer.printSeparator();
     }
 }
