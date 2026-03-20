@@ -3,52 +3,56 @@ public class Invoice {
     private int invoiceNumber;
     private String customerName;
     private double subtotal;
+    private double tax;
 
-    private TaxCalculator taxCalculator;
+    private static final double TAX_RATE = 0.15;
 
-    public Invoice(int invoiceNumber, String customerName, double subtotal, TaxCalculator taxCalculator) {
+    public Invoice(int invoiceNumber, String customerName, double subtotal) {
         this.invoiceNumber = invoiceNumber;
         this.customerName = customerName;
         this.subtotal = subtotal;
-        this.taxCalculator = taxCalculator;
+        recalculateTax();
     }
 
-    // --- Cálculos ---
+    // -----------------------------
+    // Getters
+    // -----------------------------
+    public int getInvoiceNumber() {
+        return invoiceNumber;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public double getSubtotal() {
+        return subtotal;
+    }
+
     public double getTax() {
-        return taxCalculator.calculateTax(subtotal);
+        return tax;
     }
 
-    public double getTotalWithTax() {
-        return subtotal + getTax();
+    public double getTotalAmountWithTax() {
+        return subtotal + tax;
     }
 
-    // --- Actualizaciones ---
+    // -----------------------------
+    // Updates
+    // -----------------------------
     public void updateCustomerName(String newName) {
         this.customerName = newName;
     }
 
-    public void applyDiscount(double discountPercentage) {
-        double discountAmount = subtotal * (discountPercentage / 100);
-        subtotal -= discountAmount;
+    public void applyDiscountAndUpdateTax(double discountPercentage) {
+        subtotal -= subtotal * (discountPercentage / 100);
+        recalculateTax();
     }
 
-    // --- Presentación ---
-    public void printInvoiceDetails(Printer printer) {
-        printer.printHeader("Invoice Details");
-        printer.printLine("Invoice Number", invoiceNumber);
-        printer.printLine("Customer Name", customerName);
-        printer.printLine("Subtotal", subtotal);
-        printer.printLine("Tax", getTax());
-        printer.printLine("Total with Tax", getTotalWithTax());
-        printer.printSeparator();
-    }
-
-    public void printDiscountSummary(Printer printer, double discountPercentage) {
-        printer.printHeader("Discount Summary");
-        printer.printLine("Discount Applied (%)", discountPercentage);
-        printer.printLine("New Subtotal", subtotal);
-        printer.printLine("New Tax", getTax());
-        printer.printLine("Total After Discount", getTotalWithTax());
-        printer.printSeparator();
+    // -----------------------------
+    // Internal logic
+    // -----------------------------
+    private void recalculateTax() {
+        this.tax = TaxCalculator.calculateTax(subtotal, TAX_RATE);
     }
 }
